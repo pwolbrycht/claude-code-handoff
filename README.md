@@ -1,4 +1,4 @@
-# claude-code-wrap-reminder
+# claude-code-handoff
 
 A Claude Code [Stop hook](https://docs.claude.com/en/docs/claude-code/hooks) + [skill](https://docs.claude.com/en/docs/claude-code/skills) that nudges you to run a `/wrap` ritual before `/exit`. Escalating reminders fire as context fills; a one-shot reminder fires the first time you edit tracked files in a session.
 
