@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Editor swap files / backups
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# shellcheck output (if you redirect it to a file)
+shellcheck.out
