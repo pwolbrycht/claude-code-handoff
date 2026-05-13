@@ -142,10 +142,13 @@ If you change `STATUS_FILE_REL`, update the `/wrap` skill at `.claude/skills/wra
 
 ### Statusline (`.claude/scripts/statusline.sh` or `~/.claude/statusline.sh`)
 
-The color tiers and thresholds are copies of the hook's; keep them in sync or pick deliberately different values if you want the statusline to escalate earlier/later than the hook. Two display-only knobs:
+Keep the threshold knobs in sync with the hook unless you want the statusline to escalate earlier/later. The pill colors are inline SGR escape sequences (not factored into variables) — if you change them, edit both scripts.
 
 | Variable | What it does |
 |---|---|
+| `CTX_THRESHOLD_LOW` | First-tier context % (default `40`) — match the hook |
+| `CTX_THRESHOLD_MID` | Second-tier context % (default `65`) — match the hook |
+| `CTX_THRESHOLD_HIGH` | Third-tier context % (default `85`) — match the hook |
 | `display_user` | Shown in the `user@host` segment. Defaults to `$USER` — replace with a literal nickname if you want |
 | `display_host` | Shown in the `user@host` segment. Defaults to `hostname -s` — replace with a literal name if you want |
 

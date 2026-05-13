@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Stop hook for Claude Code. Fires once per escalation:
-#   ctx > CTX_THRESHOLD_LOW   -> gentle red    (default 40%)
-#   ctx > CTX_THRESHOLD_MID   -> bold red      (default 65%)
-#   ctx > CTX_THRESHOLD_HIGH  -> bold red + reverse video alarm (default 85%)
-# Plus a one-shot tracked-file nudge if Edit/Write touched a path matching
-# TRACKED_FILES_REGEX and STATUS_FILE_REL was not modified this session.
+# Stop hook for Claude Code. Each tier fires up to 3 times per session:
+#   ctx >= CTX_THRESHOLD_LOW   -> light yellow pill  (default 40%)
+#   ctx >= CTX_THRESHOLD_MID   -> orange pill        (default 65%)
+#   ctx >= CTX_THRESHOLD_HIGH  -> volcano red pill   (default 85%)
+# Plus a tracked-file nudge (also up to 3 times) if Edit/Write touched a path
+# matching TRACKED_FILES_REGEX and STATUS_FILE_REL was not modified this session.
 #
 # Wired in .claude/settings.json under hooks.Stop.
 # State per-session: ~/.claude/state/claude-stop-hook-<session_id>.state
@@ -77,8 +77,9 @@ if [[ -f "$status_md" && -n "$transcript_path" && -f "$transcript_path" ]]; then
   fi
 fi
 
-# Detect Edit/Write on tracked files. Skip when state already says yes
-# (cached) or we've already fired — both make a re-scan pointless.
+# Detect Edit/Write on tracked files. Skip once the cache (infra_edited)
+# says yes — that's a permanent decision for this session. Firing count
+# is tracked separately via infra_count.
 # Note: grep without -q is deliberate. With `set -o pipefail`, `grep -q` exits
 # on first match and SIGPIPE'd jq returns 141, which flips the if-branch to
 # false. Reading jq's full output (whose cost we already pay) avoids that.
@@ -124,6 +125,7 @@ if [[ "$infra_edited" == "yes" && "$status_recent" == "no" && "$infra_count" -lt
   infra_count=$((infra_count + 1))
 fi
 
+# last_level: persisted for diagnostic value (highest tier reached this session); not used for control flow.
 (( level > last_level )) && last_level=$level
 {
   echo "last_level=$last_level"

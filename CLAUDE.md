@@ -22,7 +22,7 @@ There is no build, test suite, or linter wired up. Sanity check: `shellcheck .cl
 | Tracked-files pattern | `TRACKED_FILES_REGEX` | Heuristics section |
 | Context thresholds | `CTX_THRESHOLD_LOW/MID/HIGH` | Implicit — the skill is what fires after the alarm |
 
-**Hook ↔ statusline** — share the RGB pill palette. The four colors are duplicated as literal SGR escape sequences in both scripts. Edit one without the other and the "same yellow in both places" guarantee breaks. Palette:
+**Hook ↔ statusline** — share both the three context thresholds (`CTX_THRESHOLD_LOW/MID/HIGH` knobs at the top of each script) and the RGB pill palette (inline SGR strings in the tier branches). Edit one side without the other and the "same yellow at the same %" guarantee breaks. Palette:
 
 - `255;235;130` light yellow — ctx ≥ 40%
 - `255;140;0` orange — ctx ≥ 65%

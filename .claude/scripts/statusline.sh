@@ -4,6 +4,13 @@
 # .claude/settings.json for per-project use).
 set -uo pipefail
 
+# --- Configurable knobs (top-of-script) -----------------------------------
+# Keep these in sync with .claude/scripts/stop-hook-wrap-reminder.sh.
+CTX_THRESHOLD_LOW=40
+CTX_THRESHOLD_MID=65
+CTX_THRESHOLD_HIGH=85
+# --------------------------------------------------------------------------
+
 payload=$(cat)
 ctx_pct=$(jq -r '.context_window.used_percentage // 0' <<<"$payload")
 ctx_pct=$(printf '%.0f' "$ctx_pct" 2>/dev/null || echo 0)
@@ -33,13 +40,13 @@ reset=$'\033[0m'
 branch_glyph=$(printf '\xee\x82\xa0')
 
 # Context tiers — colored backgrounds with action messages, same palette as the hook
-if (( ctx_pct >= 85 )); then
+if (( ctx_pct >= CTX_THRESHOLD_HIGH )); then
   ctx_color=$'\033[1;97;48;2;180;30;30m'
   action='🚨 /wrap NOW'
-elif (( ctx_pct >= 65 )); then
+elif (( ctx_pct >= CTX_THRESHOLD_MID )); then
   ctx_color=$'\033[1;30;48;2;255;140;0m'
   action='⚠️  /wrap soon'
-elif (( ctx_pct >= 40 )); then
+elif (( ctx_pct >= CTX_THRESHOLD_LOW )); then
   ctx_color=$'\033[1;30;48;2;255;235;130m'
   action='💡 /wrap before /exit'
 else
