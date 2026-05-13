@@ -37,7 +37,10 @@ cwd=$(jq -r '.cwd // "."' <<<"$payload")
 mkdir -p "${HOME}/.claude/state"
 state_file="${HOME}/.claude/state/claude-stop-hook-${session_id}.state"
 last_level=0
-infra_fired=no
+level1_count=0
+level2_count=0
+level3_count=0
+infra_count=0
 infra_edited=no
 # shellcheck disable=SC1090
 [[ -f "$state_file" ]] && . "$state_file"
@@ -79,38 +82,55 @@ fi
 # Note: grep without -q is deliberate. With `set -o pipefail`, `grep -q` exits
 # on first match and SIGPIPE'd jq returns 141, which flips the if-branch to
 # false. Reading jq's full output (whose cost we already pay) avoids that.
-if [[ "$infra_edited" == "no" && "$infra_fired" == "no" \
-      && -n "$transcript_path" && -f "$transcript_path" ]]; then
+if [[ "$infra_edited" == "no" && -n "$transcript_path" && -f "$transcript_path" ]]; then
   if jq -r 'select(.type == "assistant") | .message?.content?[]? | select(.type == "tool_use" and (.name == "Edit" or .name == "Write")) | .input?.file_path? // empty' "$transcript_path" 2>/dev/null \
        | grep -E "$TRACKED_FILES_REGEX" >/dev/null 2>&1; then
     infra_edited=yes
   fi
 fi
 
-R=$'\033[1;91m'
-# Bold red + reverse video. Blink (SGR 5) is silently ignored by many modern
-# terminals (Ghostty etc.), which made level 3 indistinguishable from level 2.
-B=$'\033[1;91;7m'
+# Pill styles — bold text on RGB backgrounds with space-padded content
+# so the background extends past the text edges.
+PILL_LOW=$'\033[1;30;48;2;255;235;130m'   # light yellow bg, black text
+PILL_MID=$'\033[1;30;48;2;255;140;0m'     # orange bg, black text
+PILL_HIGH=$'\033[1;97;48;2;180;30;30m'    # volcano red bg, white text
+PILL_INFO=$'\033[1;30;48;2;72;161;192m'   # teal bg, black text (infra nudge)
 N=$'\033[0m'
 
 lines=()
-if (( level > last_level )); then
-  case "$level" in
-    1) lines+=("${R}💡 Context ${ctx_pct}% · consider /wrap before /exit${N}") ;;
-    2) lines+=("${R}⚠️  Context ${ctx_pct}% · /wrap soon or you'll hit compaction${N}") ;;
-    3) lines+=("${B}🚨 Context ${ctx_pct}% · /wrap NOW${N}") ;;
-  esac
-fi
+case "$level" in
+  1)
+    if (( level1_count < 3 )); then
+      lines+=("${PILL_LOW} 💡 Context ${ctx_pct}% · consider /wrap before /exit ${N}")
+      level1_count=$((level1_count + 1))
+    fi
+    ;;
+  2)
+    if (( level2_count < 3 )); then
+      lines+=("${PILL_MID} ⚠️  Context ${ctx_pct}% · /wrap soon or you'll hit compaction ${N}")
+      level2_count=$((level2_count + 1))
+    fi
+    ;;
+  3)
+    if (( level3_count < 3 )); then
+      lines+=("${PILL_HIGH} 🚨 Context ${ctx_pct}% · /wrap NOW ${N}")
+      level3_count=$((level3_count + 1))
+    fi
+    ;;
+esac
 
-if [[ "$infra_edited" == "yes" && "$status_recent" == "no" && "$infra_fired" == "no" ]]; then
-  lines+=("${R}📝 Tracked files edited this session — /wrap before /exit to update ${STATUS_FILE_REL}${N}")
-  infra_fired=yes
+if [[ "$infra_edited" == "yes" && "$status_recent" == "no" && "$infra_count" -lt 3 ]]; then
+  lines+=("${PILL_INFO} 📝 Tracked files edited this session — /wrap before /exit to update ${STATUS_FILE_REL} ${N}")
+  infra_count=$((infra_count + 1))
 fi
 
 (( level > last_level )) && last_level=$level
 {
   echo "last_level=$last_level"
-  echo "infra_fired=$infra_fired"
+  echo "level1_count=$level1_count"
+  echo "level2_count=$level2_count"
+  echo "level3_count=$level3_count"
+  echo "infra_count=$infra_count"
   echo "infra_edited=$infra_edited"
 } > "$state_file"
 
