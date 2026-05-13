@@ -12,7 +12,7 @@ Three components that work together:
 |---|---|---|
 | **Stop hook** (`.claude/scripts/stop-hook-wrap-reminder.sh`) | After each assistant turn when a threshold is crossed | "Moment of attention" — bright colored pill in the terminal output |
 | **Statusline** (`.claude/scripts/statusline.sh`) | Always visible at the bottom of the Claude Code UI | "Ambient awareness" — persistent pill that re-renders every prompt |
-| **/wrap skill** (`.claude/skills/wrap.md`) | When you type `/wrap` | Walks the actual end-of-session ritual: survey what changed, propose updates, apply on approval |
+| **/wrap skill** (`.claude/skills/wrap/SKILL.md`) | When you type `/wrap` | Walks the actual end-of-session ritual: survey what changed, propose updates, apply on approval |
 
 The hook gets your attention at the moment context crosses a threshold; the statusline keeps the state visible so you can't tune it out; the skill walks the actual ritual when you're ready.
 
@@ -138,7 +138,7 @@ Disable either piece any time by removing the corresponding block from `settings
 
 The "fire up to 3 times" count is the literal `< 3` in each `case` branch — search the file for `level1_count < 3` and adjust if you want a different ceiling.
 
-If you change `STATUS_FILE_REL`, update the `/wrap` skill at `.claude/skills/wrap.md` to reference the same path — the skill's "what changed → where to put it" mapping is the human-readable side of the same convention.
+If you change `STATUS_FILE_REL`, update the `/wrap` skill at `.claude/skills/wrap/SKILL.md` to reference the same path — the skill's "what changed → where to put it" mapping is the human-readable side of the same convention.
 
 ### Statusline (`.claude/scripts/statusline.sh` or `~/.claude/statusline.sh`)
 

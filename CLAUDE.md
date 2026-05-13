@@ -8,7 +8,7 @@ A distribution of three coupled Claude Code artifacts, not an application:
 
 - `.claude/scripts/stop-hook-wrap-reminder.sh` — `Stop` hook. Fires a colored pill in the terminal at three context-fill thresholds, plus a teal pill when tracked files are edited.
 - `.claude/scripts/statusline.sh` — companion statusline. Always visible at the bottom of the UI; same color palette as the hook plus an action message keyed to ctx %.
-- `.claude/skills/wrap.md` — the `/wrap` skill the hook and statusline are nudging the user toward.
+- `.claude/skills/wrap/SKILL.md` — the `/wrap` skill the hook and statusline are nudging the user toward.
 
 There is no build, test suite, or linter wired up. Sanity check: `shellcheck .claude/scripts/*.sh`. A copy-pasteable demo loop that walks both scripts through all four threshold ranges is in the README's verification section.
 
