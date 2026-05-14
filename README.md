@@ -4,6 +4,8 @@ A Claude Code [Stop hook](https://docs.claude.com/en/docs/claude-code/hooks) + [
 
 Claude Code's `/wrap` ritual — closing out a session by flushing the next-fresh-session-friendly state back to disk — is easy to forget after a long debugging stretch, especially when `/compact` resets your sense of how full context is. This is a small, opinionated nag layer that fixes that.
 
+![Stop hook firing an orange context-warning pill plus a teal tracked-files nudge, with a matching orange statusline at the bottom of the terminal](docs/images/frame-tracked.png)
+
 ## What's in the repo
 
 Three components that work together:
@@ -27,6 +29,14 @@ Fires at the end of every assistant turn. Prints a color-coded pill in your term
 | Context ≥ 85% | volcano red, bold white text | `🚨 Context X% · /wrap NOW` |
 | Edit/Write on a tracked file path | teal, bold black text | `📝 Tracked files edited this session — /wrap before /exit to update <STATUS_FILE_REL>` |
 
+The three context tiers, in order:
+
+![Light-yellow pill firing at 50% context: 'Context 50% · consider /wrap before /exit'](docs/images/frame-yellow.png)
+
+![Orange pill firing at 72% context: 'Context 72% · /wrap soon or you'll hit compaction'](docs/images/frame-orange.png)
+
+![Volcano-red pill firing at 90% context: 'Context 90% · /wrap NOW'](docs/images/frame-red.png)
+
 Each warning fires up to **3 times at its threshold** — after that the level goes silent for the rest of the session. Escalating to a higher tier (e.g. 50% → 70%) starts the new tier fresh at count 1; lower tiers don't double-fire.
 
 State is tracked per-session at `~/.claude/state/claude-stop-hook-<session_id>.state` and includes the per-level fire counts plus a cached transcript-scan result so the expensive `jq` scan only runs until the first detection.
@@ -39,7 +49,11 @@ Always-visible at the bottom of the Claude Code UI. Same color tiers as the hook
 alice@laptop:~/code/example  main ·  ctx:50% · 💡 /wrap before /exit  · Opus 4.7
 ```
 
-Unlike the hook (which prints once per threshold crossing and then scrolls off as you continue), the statusline re-renders on every prompt — so you can't miss the state by scrolling past it. The pill's color and message change as you fill up. Below 40%, the segment dims to `all clear` so the slot stays consistent.
+Below 40% the segment dims to `all clear` so the slot stays consistent:
+
+![Statusline at 30% context with the dim 'all clear' segment, no pill](docs/images/frame-baseline.png)
+
+Unlike the hook (which prints once per threshold crossing and then scrolls off as you continue), the statusline re-renders on every prompt — so you can't miss the state by scrolling past it. The pill's color and message change as you fill up.
 
 ## The /wrap skill
 
