@@ -116,6 +116,10 @@ case "$level" in
     if (( level3_count < 3 )); then
       lines+=("${PILL_HIGH} 🚨 Context ${ctx_pct}% · /wrap NOW ${N}")
       level3_count=$((level3_count + 1))
+      # TODO(2.1.141): emit out-of-band nudge via `terminalSequence` field in
+      # hook JSON output — window title (OSC 2), terminal bell, and/or desktop
+      # notification (OSC 9). Holding until Anthropic documents the field's
+      # exact schema (string vs object, per-capability syntax).
     fi
     ;;
 esac
