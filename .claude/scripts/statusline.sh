@@ -15,6 +15,7 @@ payload=$(cat)
 ctx_pct=$(jq -r '.context_window.used_percentage // 0' <<<"$payload")
 ctx_pct=$(printf '%.0f' "$ctx_pct" 2>/dev/null || echo 0)
 model=$(jq -r '.model.display_name // "Claude"' <<<"$payload")
+effort=$(jq -r '.effort.level // ""' <<<"$payload")
 cwd=$(jq -r '.workspace.current_dir // "."' <<<"$payload")
 display_cwd="${cwd/#$HOME/~}"
 
@@ -61,5 +62,7 @@ branch_seg=""
 [[ -n "$branch" ]] && branch_seg=" ${purple}${branch_glyph} ${branch}${reset}"
 ctx_seg="${ctx_color} ctx:${ctx_pct}% · ${action} ${reset}"
 model_seg="${dim}${model}${reset}"
+effort_seg=""
+[[ -n "$effort" ]] && effort_seg=" · ${dim}effort:${effort}${reset}"
 
-printf '%s:%s%s · %s · %s' "$user_host" "$path_seg" "$branch_seg" "$ctx_seg" "$model_seg"
+printf '%s:%s%s · %s · %s%s' "$user_host" "$path_seg" "$branch_seg" "$ctx_seg" "$model_seg" "$effort_seg"
